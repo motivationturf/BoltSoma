@@ -1,0 +1,76 @@
+/**
+ * PROJECT: SomaSmart EduHub – Supabase Integration Setup
+ * PLATFORM: Replit (using React + Vite + Supabase JS client)
+ *
+ * GOALS:
+ * 1. Integrate Supabase into the entire app.
+ * 2. Enable authentication with role-based user types (pupil, teacher, admin, parent).
+ * 3. Store user profile data in a "users" table.
+ * 4. Provide global Supabase client access throughout the app.
+ */
+
+// 1️⃣ — Install Supabase client if not yet installed
+// npm install @supabase/supabase-js
+
+// 2️⃣ — Set up .env file with these keys from your Supabase project
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+// 3️⃣ — Create a Supabase client (supabaseClient.js or supabase.ts)
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+
+export default supabase;
+
+// 4️⃣ — Create a "users" table in Supabase with fields:
+id (UUID, PK, default: auth.uid()), email (text), full_name (text), role (text - ENUM or string), created_at (timestamp)
+
+// 5️⃣ — In your signup form:
+// - Collect email, password, full name, and user type (pupil, teacher, admin, parent)
+// - On successful signup, insert the additional user info into the "users" table
+
+// Example Signup Logic:
+async function handleSignup({ email, password, fullName, role }) {
+  const { data: authData, error: signUpError } = await supabase.auth.signUp({
+    email,
+    password
+  });
+
+  if (signUpError) return console.error(signUpError.message);
+
+  const userId = authData.user.id;
+
+  const { error: dbError } = await supabase
+    .from('users')
+    .insert([
+      { id: userId, email, full_name: fullName, role }
+    ]);
+
+  if (dbError) return console.error(dbError.message);
+
+  console.log('User signed up and profile saved!');
+}
+
+// 6️⃣ — On login, fetch user data and store in global context
+// Use a UserContext with React Context API to store:
+// - session info
+- user profile (including role)
+
+// 7️⃣ — Create protected routes based on user role
+// Example: `/teacher/dashboard` should only be accessible if user.role === 'teacher'
+// If not authorized, redirect to access denied or login page
+
+// 8️⃣ — Add Logout functionality
+await supabase.auth.signOut();
+
+// 9️⃣ — Use Supabase's onAuthStateChange to track session across pages
+useEffect(() => {
+  const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    // Update context or global state
+  });
+  return () => listener?.unsubscribe();
+}, []);

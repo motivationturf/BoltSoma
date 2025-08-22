@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Test</title>
+</head>
+<body>
+    <h1>Authentication Test</h1>
+    
+    <div>
+        <h2>Register</h2>
+        <form id="registerForm">
+            <input type="email" id="registerEmail" placeholder="Email" value="testfrontend@example.com"><br>
+            <input type="password" id="registerPassword" placeholder="Password" value="Password123!"><br>
+            <input type="text" id="registerFirstName" placeholder="First Name" value="Test"><br>
+            <input type="text" id="registerLastName" placeholder="Last Name" value="Frontend"><br>
+            <input type="text" id="registerGrade" placeholder="Grade" value="12"><br>
+            <button type="submit">Register</button>
+        </form>
+        <div id="registerResult"></div>
+    </div>
+
+    <div>
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Email" value="testfrontend@example.com"><br>
+            <input type="password" id="loginPassword" placeholder="Password" value="Password123!"><br>
+            <button type="submit">Login</button>
+        </form>
+        <div id="loginResult"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:5001/api/auth';
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('registerResult');
+            
+            const data = {
+                email: document.getElementById('registerEmail').value,
+                password: document.getElementById('registerPassword').value,
+                firstName: document.getElementById('registerFirstName').value,
+                lastName: document.getElementById('registerLastName').value,
+                grade: document.getElementById('registerGrade').value
+            };
+
+            try {
+                const response = await fetch(`${BASE_URL}/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+                resultDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                
+                if (result.success) {
+                    resultDiv.style.color = 'green';
+                    // Store the token for login test
+                    localStorage.setItem('test_token', result.token);
+                } else {
+                    resultDiv.style.color = 'red';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('loginResult');
+            
+            const data = {
+                username: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            try {
+                const response = await fetch(`${BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+                resultDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                
+                if (result.success) {
+                    resultDiv.style.color = 'green';
+                } else {
+                    resultDiv.style.color = 'red';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html> 

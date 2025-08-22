@@ -1,0 +1,1 @@
+export { EnhancedDashboard as default } from '../components/dashboard/EnhancedDashboard'; 

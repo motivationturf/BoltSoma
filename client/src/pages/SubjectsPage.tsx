@@ -1,0 +1,1 @@
+export { SubjectCatalog as default } from '../components/subjects/SubjectCatalog'; 

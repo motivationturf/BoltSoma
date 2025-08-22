@@ -1,0 +1,1 @@
+export { LeaderboardsPage as default } from '../components/leaderboards/LeaderboardsPage'; 

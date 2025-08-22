@@ -1,0 +1,1 @@
+export { ChallengesPage as default } from '../components/challenges/ChallengesPage'; 
